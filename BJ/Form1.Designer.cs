@@ -473,10 +473,10 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Calibri", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label4.Font = new System.Drawing.Font("Calibri", 40F);
             this.label4.Location = new System.Drawing.Point(418, 229);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(81, 33);
+            this.label4.Size = new System.Drawing.Size(160, 66);
             this.label4.TabIndex = 25;
             this.label4.Text = "label4";
             this.label4.Click += new System.EventHandler(this.label4_Click);
