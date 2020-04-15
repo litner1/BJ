@@ -484,10 +484,10 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Calibri", 20F);
+            this.label5.Font = new System.Drawing.Font("Calibri", 40F);
             this.label5.Location = new System.Drawing.Point(168, 315);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(81, 33);
+            this.label5.Size = new System.Drawing.Size(160, 66);
             this.label5.TabIndex = 26;
             this.label5.Text = "label5";
             this.label5.Click += new System.EventHandler(this.label5_Click);
