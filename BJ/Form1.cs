@@ -8,377 +8,24 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-
-
-
-
-
 namespace BJ
 {
-
-
     public partial class Form1 : Form
     {
-        public class PLayer
+
+        public static bool newgame = false;
+
+
+        List<Card> Cards = new List<Card>();
+        List<Card> tmp_cards = new List<Card>();
+        Player Human = new Player(), Computer = new Player(), Dealer = new Player();
+        List<Player> Players = new List<Player>();
+        Random rnd = new Random();//2
+        List<Button> buttons = new List<Button>();
+
+
+        void setbox()
         {
-            public List<PictureBox> pic = new List<PictureBox>();
-            public List<int> cards = new List<int>();
-            public int money = 100;
-            public int counter = 2;
-            public int Splitcounter = 1;
-            public int bet = 0;
-
-            public List<PictureBox> Splitpic = new List<PictureBox>();
-            public List<int> Splitcards = new List<int>();
-
-            public int getPoints(List<int> x)
-            {
-                List<int> bestresult = new List<int>();
-                int result = 0;
-                for(int i = 0; i < x.Count; i++)
-                {
-                    if (x[i] % 13 < 7)
-                        result += (x[i] % 13 + 2);
-                    else if (x[i] % 13 == 7)
-                    {
-                        result += 9;
-                    }
-                    else if (x[i] % 13 > 7 && x[i] % 13 < 12)
-                    {
-                        result += 10;
-                    }
-                    else if (x[i] % 13 == 12) 
-                    {
-                        result += 1;
-                    }
-                }
-
-                bestresult.Add(result);
-                for(int i = 0, j=0; i < x.Count; i++)
-                {
-                    if (x[i] % 13 == 12)
-                    {
-                        j++;
-                        bestresult.Add(result + j * 10);
-                    }
-                }
-
-                bestresult.Sort();
-                int tmp = result;
-                for(int i = 0; i < bestresult.Count; i++)
-                {
-                    if (bestresult[i] > 21)
-                    {
-                        return tmp;
-                    }
-                    tmp = bestresult[i];
-                }
-
-                return tmp;
-                
-
-               
-            }
-        }
-
-
-       
-        PLayer Human = new PLayer(), Computer = new PLayer(), Dealer = new PLayer();
-        public List<PLayer> PLayers = new List<PLayer>();
-        List<Image> Cards = new List<Image>();
-        List<int> Index = new List<int>();
-        Random rnd = new Random(2); //10 //2 //13
-        List<string> EvaluationTable = new List<string>();
-        List<string> SplitTable = new List<string>();
-
-        void begin()
-        {
-            int r = rnd.Next(0, Index.Count);
-            for(int i = 0; i < 3; i++)
-            {
-                if (PLayers[i].money < 2 && PLayers[i].bet==0)
-                    continue;
-                for(int j = 0; j < 2; j++)
-                {
-                    if (i == 2 && j == 1)
-                        continue;
-                    //test
-                    r = rnd.Next(0, Index.Count);
-                    if (i == 1)
-                    {
-                        r = 13;
-                    }
-                    if (i == 1 && j == 1)
-                        r = 24;
-                    //test
-                    PLayers[i].cards.Add(Index[r]);
-                    PLayers[i].pic[j].Image = Cards[Index[r]];
-                    Index.Remove(Index[r]);
-                }
-            }
-          
-
-
-        }
-
-        void call(bool x = true)
-        {
-            button1.Enabled = false;
-            button2.Enabled = false;
-            button3.Enabled = false;
-            if (Human.money < 2)
-            {
-                button4.Enabled = false;
-                if (x == false)
-                    label5.Text = "koniec gry";
-            }
-            if (Human.money < 4)
-                button5.Enabled = false;
-            if (Human.money < 10)
-                button6.Enabled = false;
-            
-        }
-
-        void ComputerCall()
-        {
-            if (Computer.money > 9)
-            {
-                Random r = new Random();
-                if (r.Next() % 3 == 0)
-                {
-                    Computer.money -= 10;
-                    Computer.bet = 10;
-                }
-                else if (r.Next() % 3 == 1)
-                {
-                    Computer.money -= 4;
-                    Computer.bet = 4;
-                }
-                else
-                {
-                    Computer.money -= 2;
-                    Computer.bet = 2;
-                }
-            }
-            else if (Computer.money > 3 && Computer.money < 10)
-            {
-                Random r = new Random();
-                if (r.Next() % 2 == 0)
-                {
-                    Computer.money -= 4;
-                    Computer.bet = 4;
-                }
-                else
-                {
-                    Computer.money -= 2;
-                    Computer.bet = 2;
-                }
-            }
-            else if (Computer.money < 4 && Computer.money > 2)
-            {
-                Computer.money -= 2;
-                Computer.bet = 2;
-            }
-            else
-            {
-                label6.Text = "koniec gry";
-            }
-        }
-
-
-        int split()
-        {
-            int tmp = Computer.getPoints(Computer.cards);
-            int dp = Dealer.getPoints(Dealer.cards);
-            char x, tmp2;
-            if (Computer.cards[0] % 13 == 12 || Computer.cards[1] % 13 == 12)
-                x = 'A';
-            else
-            {
-                x = (char)((tmp / 2) + 48);
-            }
-
-            if (x == 'A')
-            {
-                tmp2 = SplitTable[9][3 + (dp - 2) * 2];
-            }
-            else
-            {
-                tmp2 = SplitTable[(tmp/2 + 8) % 10][3 + (dp - 2) * 2];
-            }
-
-            if (tmp2 == 's' || tmp2 == 'h')
-                return 0;
-            else
-            {
-                Computer.money -= Computer.bet;
-                pictureBox29.Image = pictureBox9.Image;
-                pictureBox9.Image = null;
-                int tm = Computer.cards[0];
-                int tm2 = Computer.cards[1];
-                Computer.cards.Clear();
-                Computer.cards.Add(tm);
-                Computer.Splitcards.Add(tm2);
-                Computer.counter--;
-                label2.Text = Computer.getPoints(Computer.cards).ToString();
-                label8.Text += Computer.getPoints(Computer.Splitcards) + "$";
-                label6.Text = Computer.money.ToString() + "$";
-
-                int r = rnd.Next(0, Index.Count);
-                Computer.pic[Computer.counter].Image = Cards[Index[r]];
-                Computer.cards.Add(Index[r]);
-                Index.Remove(Index[r]);
-                Computer.counter++;
-
-                r = rnd.Next(0, Index.Count);
-                Computer.Splitpic[Computer.Splitcounter].Image = Cards[Index[r]];
-                Computer.Splitcards.Add(Index[r]);
-                Index.Remove(Index[r]);
-                Computer.Splitcounter++;
-
-                int cs = 0;
-                bool isace = true;
-                while ((cs = Computer.getPoints(Computer.Splitcards)) < 22)
-                {
-
-                    tmp = cs;
-                    bool ace = false;
-
-                    for (int i = 0; i < Computer.Splitcards.Count; i++)
-                        if (Computer.Splitcards[i] % 13 == 12)
-                        {
-                            ace = true;
-                            break;
-                        }
-
-                    if (ace && isace)
-                    {
-                        isace = false;
-                        int tmp3 = cs - 11;
-                        string y = EvaluationTable[10 + (tmp2 + 8) % 10];
-                        char decisions = y[3 + (dp - 2) * 2];
-                        if (decisions == 's')
-                            break;
-                        else
-                        {
-                            r = rnd.Next(0, Index.Count);
-                            Computer.Splitpic[Computer.Splitcounter].Image = Cards[Index[r]];
-                            Computer.Splitcards.Add(Index[r]);
-                            Index.Remove(Index[r]);
-                            Computer.Splitcounter++;
-                        }
-
-                    }
-                    else
-                    {
-                        if (tmp > 16)
-                            break;
-                        if (tmp < 9)
-                            tmp = 8;
-                        else
-                            tmp = tmp % 10;
-                        string y = EvaluationTable[(tmp + 2) % 10];
-                        char decisions = y[3 + (dp - 2) * 2];
-                        if (decisions == 's')
-                            break;
-                        else
-                        {
-                            r = rnd.Next(0, Index.Count);
-                            Computer.Splitpic[Computer.Splitcounter].Image = Cards[Index[r]];
-                            Computer.Splitcards.Add(Index[r]);
-                            Index.Remove(Index[r]);
-                            Computer.Splitcounter++;
-                        }
-                    }
-
-                }
-            }
-
-
-
-            return 0;
-        }
-    
-
-        public Form1()
-        {
-
-
-            //dodanie obrazkow do listy picttureboxow
-            int a = 0;
-            int b = 0;
-            PictureBox tmp = new PictureBox();
-            /*
-            for (int i = 1; i <= 52; i++)
-            {
-                //"C: /Users/Piotr/source/repos/Projekt indywidualny/BJ/BJ/Resources/"
-                string FilePath = "C: /Users/Piotr/source/repos/Projekt indywidualny/BJ/BJ/Resources/";
-                a = i % 10;
-                b = (i - a) / 10;
-                FilePath += (char)(b + 48);
-                FilePath += (char)(a + 48);
-                FilePath += ".png";
-                tmp.Image = Image.FromFile(FilePath);
-                Cards.Add(tmp.Image);
-            }
-            */
-
-            Cards.Add(BJ.Properties.Resources._01);
-            Cards.Add(BJ.Properties.Resources._02);
-            Cards.Add(BJ.Properties.Resources._03);
-            Cards.Add(BJ.Properties.Resources._04);
-            Cards.Add(BJ.Properties.Resources._05);
-            Cards.Add(BJ.Properties.Resources._06);
-            Cards.Add(BJ.Properties.Resources._07);
-            Cards.Add(BJ.Properties.Resources._08);
-            Cards.Add(BJ.Properties.Resources._09);
-            Cards.Add(BJ.Properties.Resources._10);
-            Cards.Add(BJ.Properties.Resources._11);
-            Cards.Add(BJ.Properties.Resources._12);
-            Cards.Add(BJ.Properties.Resources._13);
-            Cards.Add(BJ.Properties.Resources._14);
-            Cards.Add(BJ.Properties.Resources._15);
-            Cards.Add(BJ.Properties.Resources._16);
-            Cards.Add(BJ.Properties.Resources._17);
-            Cards.Add(BJ.Properties.Resources._18);
-            Cards.Add(BJ.Properties.Resources._19);
-            Cards.Add(BJ.Properties.Resources._20);
-            Cards.Add(BJ.Properties.Resources._21);
-            Cards.Add(BJ.Properties.Resources._22);
-            Cards.Add(BJ.Properties.Resources._23);
-            Cards.Add(BJ.Properties.Resources._24);
-            Cards.Add(BJ.Properties.Resources._25);
-            Cards.Add(BJ.Properties.Resources._26);
-            Cards.Add(BJ.Properties.Resources._27);
-            Cards.Add(BJ.Properties.Resources._28);
-            Cards.Add(BJ.Properties.Resources._29);
-            Cards.Add(BJ.Properties.Resources._30);
-            Cards.Add(BJ.Properties.Resources._31);
-            Cards.Add(BJ.Properties.Resources._32);
-            Cards.Add(BJ.Properties.Resources._33);
-            Cards.Add(BJ.Properties.Resources._34);
-            Cards.Add(BJ.Properties.Resources._35);
-            Cards.Add(BJ.Properties.Resources._36);
-            Cards.Add(BJ.Properties.Resources._37);
-            Cards.Add(BJ.Properties.Resources._38);
-            Cards.Add(BJ.Properties.Resources._39);
-            Cards.Add(BJ.Properties.Resources._40);
-            Cards.Add(BJ.Properties.Resources._41);
-            Cards.Add(BJ.Properties.Resources._42);
-            Cards.Add(BJ.Properties.Resources._43);
-            Cards.Add(BJ.Properties.Resources._44);
-            Cards.Add(BJ.Properties.Resources._45);
-            Cards.Add(BJ.Properties.Resources._46);
-            Cards.Add(BJ.Properties.Resources._47);
-            Cards.Add(BJ.Properties.Resources._48);
-            Cards.Add(BJ.Properties.Resources._49);
-            Cards.Add(BJ.Properties.Resources._50);
-            Cards.Add(BJ.Properties.Resources._51);
-            Cards.Add(BJ.Properties.Resources._52);
-
-
-            InitializeComponent();
-
             //przypisanie pictureboxow graczom
             Human.pic.Add(pictureBox1);
             Human.pic.Add(pictureBox2);
@@ -401,512 +48,572 @@ namespace BJ
             Dealer.pic.Add(pictureBox19);
             Dealer.pic.Add(pictureBox20);
             Dealer.pic.Add(pictureBox21);
-            PLayers.Add(Human);
-            PLayers.Add(Computer);
-            PLayers.Add(Dealer);
-
 
             //split
-            Human.Splitpic.Add(pictureBox22);
-            Human.Splitpic.Add(pictureBox23);
-            Human.Splitpic.Add(pictureBox24);
-            Human.Splitpic.Add(pictureBox25);
-            Human.Splitpic.Add(pictureBox26);
-            Human.Splitpic.Add(pictureBox27);
-            Human.Splitpic.Add(pictureBox28);
-            Computer.Splitpic.Add(pictureBox29);
-            Computer.Splitpic.Add(pictureBox30);
-            Computer.Splitpic.Add(pictureBox31);
-            Computer.Splitpic.Add(pictureBox32);
-            Computer.Splitpic.Add(pictureBox33);
-            Computer.Splitpic.Add(pictureBox34);
-            Computer.Splitpic.Add(pictureBox35);
-
-            //zablokowanie mozliwosci innych guzikow
-            button1.Enabled = false;
-            button2.Enabled = false;
-            button3.Enabled = false;
-            button7.Enabled = false;
-            button8.Enabled = false;
-            button9.Enabled = false;
-
-            for (int i = 0; i < 3; i++)
-                PLayers[i].money = 50;
-
-            label1.Text = null;
-            label2.Text = null;
-            label3.Text = null;
-            label4.Text = "krupier dobiera do 16, jak ma wiecej to pasuje";
-            label5.Text = Human.money.ToString() + "$";
-            label6.Text = Computer.money.ToString() + "$";
-            label7.Text = null;
-            label8.Text = null;
-
-            //ewaluacja komputera
-            EvaluationTable.Add("08,h,h,h,h,h,h,h,h,h,h");//0
-            EvaluationTable.Add("09,h,h,h,h,h,h,h,h,h,h");
-            EvaluationTable.Add("10,h,h,h,h,h,h,h,h,h,h");
-            EvaluationTable.Add("11,h,h,h,h,h,h,h,h,h,h");
-            EvaluationTable.Add("12,h,h,s,s,s,h,h,h,h,h");
-            EvaluationTable.Add("13,s,s,s,s,s,h,h,h,h,h");
-            EvaluationTable.Add("14,s,s,s,s,s,h,h,h,h,h");
-            EvaluationTable.Add("15,s,s,s,s,s,h,h,h,h,h");
-            EvaluationTable.Add("16,s,s,s,s,s,h,h,h,h,h");
-            EvaluationTable.Add("17,s,s,s,s,s,s,s,s,s,s");
-            EvaluationTable.Add("A2,h,h,h,h,h,h,h,h,h,h");
-            EvaluationTable.Add("A3,h,h,h,h,h,h,h,h,h,h");
-            EvaluationTable.Add("A4,h,h,h,h,h,h,h,h,h,h");
-            EvaluationTable.Add("A5,h,h,h,h,h,h,h,h,h,h");
-            EvaluationTable.Add("A6,h,h,h,h,h,h,h,h,h,h");
-            EvaluationTable.Add("A7,s,h,h,h,h,s,s,h,h,h");
-            EvaluationTable.Add("A8,s,s,s,s,s,s,s,s,s,s");
-            EvaluationTable.Add("A9,s,s,s,s,s,s,s,s,s,s");
-            EvaluationTable.Add("A0,s,s,s,s,s,s,s,s,s,s");//18
-
-            //h-dobierz, s-pas, p-split
-
-            SplitTable.Add("22,p,p,p,p,p,p,h,h,h,h");
-            SplitTable.Add("33,p,p,p,p,p,p,p,p,p,h");
-            SplitTable.Add("44,h,h,h,p,p,h,h,h,h,h");
-            SplitTable.Add("55,h,h,h,h,h,h,h,h,h,h");
-            SplitTable.Add("66,p,p,p,p,p,h,h,h,h,h");
-            SplitTable.Add("77,p,p,p,p,p,p,h,h,h,h");
-            SplitTable.Add("88,p,p,p,p,p,p,p,p,h,h");
-            SplitTable.Add("90,p,p,p,p,p,s,p,p,s,s");
-            SplitTable.Add("00,s,s,s,s,s,s,s,s,s,s");
-            SplitTable.Add("AA,p,p,p,p,p,p,p,p,p,h");
+            Human.split_pic.Add(pictureBox22);
+            Human.split_pic.Add(pictureBox23);
+            Human.split_pic.Add(pictureBox24);
+            Human.split_pic.Add(pictureBox25);
+            Human.split_pic.Add(pictureBox26);
+            Human.split_pic.Add(pictureBox27);
+            Human.split_pic.Add(pictureBox28);
+            Computer.split_pic.Add(pictureBox29);
+            Computer.split_pic.Add(pictureBox30);
+            Computer.split_pic.Add(pictureBox31);
+            Computer.split_pic.Add(pictureBox32);
+            Computer.split_pic.Add(pictureBox33);
+            Computer.split_pic.Add(pictureBox34);
+            Computer.split_pic.Add(pictureBox35);
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        void do_split()
         {
+            Computer.money -= Computer.bet;
+            pictureBox29.Image = pictureBox9.Image;
+            pictureBox9.Image = null;
+            Card tm = Computer.cards[0];
+            Card tm2 = Computer.cards[1];
+            Computer.cards.Clear();
+            Computer.cards.Add(tm);
+            Computer.split_cards.Add(tm2);
+            Computer.counter--;
 
+            int r = rnd.Next(tmp_cards.Count);
+            Computer.draw(tmp_cards[r], Computer.split_counter, true);
+            tmp_cards.Remove(tmp_cards[r]);
+            Computer.split_counter++;
+
+            r = rnd.Next(tmp_cards.Count);
+            Computer.draw(tmp_cards[r], Computer.counter);
+            tmp_cards.Remove(tmp_cards[r]);
+            Computer.counter++;
+
+            label2.Text = "Kapitał Gracza Komputerowego " + Computer.money.ToString() + "$" + "\nStawka " + Computer.bet.ToString() + "$   " + Computer.get_points(Computer.cards).ToString() + "pkt";
+            label9.Text = "Split   " + Computer.get_points(Computer.split_cards).ToString() + "pkt";
+
+            //dzialanie
+            if (Computer.split_cards[0].value == 1 || Computer.split_cards[1].value == 1)
+            {
+                r = rnd.Next(tmp_cards.Count);
+                Computer.do_ace(tmp_cards[r], Computer, Dealer,true);
+            }
+
+            while (Computer.get_points(Computer.split_cards) < 22)
+            {
+                if (Computer.evaluate(Computer, Dealer, true) == true)
+                {
+                    label9.Text = "Split   " + Computer.get_points(Computer.split_cards).ToString() + "pkt";
+                    break;
+                }
+                r = rnd.Next(tmp_cards.Count);
+                Computer.draw(tmp_cards[r], Computer.split_counter,true);
+                tmp_cards.Remove(tmp_cards[r]);
+                Computer.split_counter++;
+                label9.Text = "Split   " + Computer.get_points(Computer.split_cards).ToString() + "pkt";
+                if (Computer.get_points(Computer.cards) > 21)
+                    label2.Text += " FURA";
+            }
+
+
+        }
+
+        void do_color()
+        {
+            int[] enable = { 50, 205, 50 };
+            int[] disable = { 220, 20, 60 };
+
+            for (int i = 0; i < buttons.Count(); i++)
+                if (buttons[i].Enabled == true)
+                    buttons[i].BackColor = Color.FromArgb(enable[0],enable[1],enable[2]);
+                else
+                    buttons[i].BackColor = Color.FromArgb(disable[0],disable[1],disable[2]);
+
+            if (textBox1.Enabled == true)
+            {
+                textBox1.BackColor = Color.FromArgb(enable[0], enable[1], enable[2]);
+                label6.BackColor = Color.FromArgb(enable[0], enable[1], enable[2]);
+            }
+            else
+            {
+                textBox1.BackColor = Color.FromArgb(disable[0], disable[1], disable[2]);
+                label6.BackColor = Color.FromArgb(disable[0], disable[1], disable[2]);
+            }
+
+
+        }
+
+        public Form1() {
+
+            //dodanie obrazkow kart
+            int a = 0;
+            int b = 0;
+            for (int i = 1; i <= 52; i++)
+            {
+                Card tmp = new Card();
+                string Path = System.IO.Path.GetFullPath(@"..\..\") + "Resources\\";
+                Path = Path.Replace('\\', '/');
+                a = i % 10;
+                b = (i - a) / 10;
+                Path += (char)(b + 48);
+                Path += (char)(a + 48);
+                Path += ".png";
+                tmp.image = Image.FromFile(Path);
+                tmp.reverse = false;
+                tmp.value = tmp.get_value(b * 10 + a);
+                Cards.Add(tmp);
+            }
+
+            InitializeComponent();
+
+            buttons.Add(button1);
+            buttons.Add(button2);
+            buttons.Add(button3);
+            buttons.Add(button4);
+            buttons.Add(button5);
+            buttons.Add(button6);
+            buttons.Add(button7);
+            buttons.Add(button8);
+            buttons.Add(button9);
+            buttons.Add(button10);
+
+            Computer.ev();
+            Players.Add(Human);
+            Players.Add(Computer);
+            Players.Add(Dealer);
+            Human.money = 50;
+            Computer.money = 50;
+            Dealer.money = 50;
+            setbox();
+
+            label1.Text = "Mój kapitał 50$";
+            label2.Text = "Kapitał Gracza Komputerowego 50$";
+            label3.Text = "Krupier\n";
             label7.Text = null;
             label8.Text = null;
-            //czyszczenie picturobox
+            label9.Text = null;
+            button1.Enabled = false;
+            button2.Enabled = false;
+            button3.Enabled = false;
+            button4.Enabled = false;
+            button5.Enabled = false;
+            button6.Enabled = false;
+            button7.Enabled = false;
+            button9.Enabled = false;
+
+            do_color();
+            newgame = false;
+        }
+
+   
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //kopiowanie kart
+            tmp_cards.Clear();
+            for (int i = 0; i < 52; i++)
+            {
+                Card x = Cards[i];
+                tmp_cards.Add(x);
+            }
+
+            //rozdanie kart
+            int r;
             for(int i = 0; i < 3; i++)
             {
-                for(int j = 0; j < 7; j++)
+                if (Players[i].money < 1 && Players[i].bet==0)
+                    continue;
+                for(int j = 0; j < 2; j++)
                 {
-                    PLayers[i].pic[j].Image = null;
-                    if (i != 2)
-                        PLayers[i].Splitpic[j].Image = null;
+
+                    r = rnd.Next(tmp_cards.Count);
+
+                   //test
+                    /*
+                    if (i == 1)
+                        r = 4;
+                    if (i == 1 && j == 1)
+                        r = 15;
+                   // if(i==2 && j==1)
+                       // r = 4;
+                    */
+
+                    Players[i].cards.Add(tmp_cards[r]);
+                    tmp_cards.Remove(tmp_cards[r]);
+                    Players[i].pic[j].Image = Players[i].cards[j].image;
                 }
             }
-
-
-            //czyszczenie kard graczy i resetowanie indexu kart
-            for(int i = 0; i < 3; i++)
+            //ukrycie kart
+            if (Computer.money > 0 || Computer.bet > 0)
             {
-                PLayers[i].cards.Clear();
-                PLayers[i].Splitcards.Clear();
-                PLayers[i].counter = 2;
-                PLayers[i].Splitcounter = 1;
+                Computer.cards[0].reverse_image = Computer.cards[0].image;
+                Computer.cards[1].reverse_image = Computer.cards[0].image;
+                Computer.cards[0].reverse = true;
+                Computer.cards[1].reverse = true;
+                pictureBox8.Image = BJ.Properties.Resources.rewers;
+                pictureBox9.Image = BJ.Properties.Resources.rewers;
             }
-            Dealer.counter = 1;
-            Index.Clear();
-            for (int i = 0; i < 52; i++)
-                Index.Add(i);
+            Dealer.cards[1].reverse_image = Dealer.cards[0].image;
+            pictureBox16.Image = BJ.Properties.Resources.rewers;
+            Dealer.cards[1].reverse = true;
 
-            //stawka
-            label5.Text = Human.money.ToString() + "$";
-            label6.Text = Computer.money.ToString() + "$";
-            call();
-
-
-
-            //rozdanie dwoch kart graczom
-            begin();
-       
-            //napisanie punktow graczy
-            label1.Text = Human.getPoints(Human.cards).ToString();
-            label2.Text = Computer.getPoints(Computer.cards).ToString();
-            label3.Text = Dealer.getPoints(Dealer.cards).ToString();
-
-
-            //zablokowanie mozliwosci innych guzikow
+            //porzadki
+            label1.Text += "   " + Human.get_points(Human.cards).ToString() + "pkt";
+            if (Computer.money > 0 || Computer.bet > 0 || Computer.bet > 0)
+                label2.Text = "Kapitał Gracza Komputerowego " + Computer.money.ToString() + "$" + "\nStawka " + Computer.bet.ToString() + "$   " + Computer.get_points(Computer.cards).ToString() + "pkt";
+            else
+                label2.Text = null;
+            label3.Text += Dealer.get_points(Dealer.cards).ToString()+"pkt";
             button1.Enabled = false;
             button2.Enabled = true;
             button3.Enabled = true;
+            if (Human.money >= Human.bet)
+                button9.Enabled = true;
 
-            //split
+            if (Human.cards[0].value == Human.cards[1].value && Human.money>=Human.bet)
+                button4.Enabled = true;
 
-            if (Human.money >= Human.bet && (Human.cards[0] % 13 == Human.cards[1] % 13 || (Human.cards[0] % 13 > 7 && Human.cards[0] % 13 < 12 && Human.cards[1] % 13 > 7 && Human.cards[1] % 13 < 12))) 
-            {
-                button7.Enabled = true;
-            }
-            else
-                button7.Enabled = false;
-
-
-
+            do_color();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            button7.Enabled = false;
-            //dobieranie karty przez gracza
-            int r = rnd.Next(0, Index.Count);
-            Human.pic[Human.counter].Image = Cards[Index[r]];
-            Human.cards.Add(Index[r]);
-            Human.getPoints(Human.cards);
-            Index.Remove(Index[r]);
+            //dobranie karty
+            int r = rnd.Next(tmp_cards.Count);
+            Human.draw(tmp_cards[r],Human.counter);
+            tmp_cards.Remove(tmp_cards[r]);
             Human.counter++;
-
-            if (Human.getPoints(Human.cards) < 22 && Human.cards.Count == 7)
-                label1.Text = "Wygrana" + (2 * Human.bet).ToString() + "$";
-            else if (Human.getPoints(Human.cards) < 22)
-                label1.Text = Human.getPoints(Human.cards).ToString();
-            else
+            label1.Text = "Mój kapitał " + Human.money.ToString() + "$" + "\nStawka " + Human.bet.ToString() + "$   " + Human.get_points(Human.cards).ToString() + "pkt";
+            if (Human.get_points(Human.cards)<22 && Human.counter == 7)
             {
-                label1.Text = "Przegrana -" + Human.bet.ToString() + "$";
+                label1.Text += " Wygrana";
                 button2.Enabled = false;
             }
 
+            if (Human.get_points(Human.cards) > 21)
+            {
+                label1.Text += " FURA";
+                button2.Enabled = false;
+            }
+            button4.Enabled = false;
+            button9.Enabled = false;
+
+            do_color();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            int hp = Human.getPoints(Human.cards);
-            int hs = Human.getPoints(Human.Splitcards);
-            int cp = Computer.getPoints(Computer.cards);
-            int cs = Computer.getPoints(Computer.Splitcards);
-            int dp = Dealer.getPoints(Dealer.cards);
 
-
-            //inteligencja komputera
-            bool sp = false;
-            bool secondturn = true;
-            if (Computer.money > 1)
+            //odkrycie kart
+            if (Computer.money > 0 || Computer.bet > 0)
             {
-                while ((cp = Computer.getPoints(Computer.cards)) < 22)
+                Computer.cards[0].reverse = false;
+                Computer.cards[1].reverse = false;
+                pictureBox8.Image = Computer.cards[0].image;
+                pictureBox9.Image = Computer.cards[1].image;
+            }
+            Dealer.cards[1].reverse = false;
+            pictureBox16.Image = Dealer.cards[1].image;
+
+        
+            //skroty
+            int hp = Human.get_points(Human.cards);
+            int cp = Computer.get_points(Computer.cards);
+            int dp = Dealer.get_points(Dealer.cards);
+            int hs = Human.get_points(Human.split_cards);
+            int cs = Computer.get_points(Computer.split_cards);
+
+
+            //komputer dobiera karty
+            if (Computer.money > 0 || Computer.bet > 0)
+            {
+                bool split = false;
+                if (Computer.cards[0].value == Computer.cards[1].value && Computer.money >= Computer.bet && Computer.get_points(Computer.split_cards) == 0)
+                    split = Computer.is_split(Computer, Dealer);
+                if (split)
+                    do_split();
+
+                if (Computer.cards[0].value == 1 || Computer.cards[1].value == 1)
                 {
+                    int r = rnd.Next(tmp_cards.Count);
+                    Computer.do_ace(tmp_cards[r], Computer, Dealer);
+                }
 
-                    if (sp == false && (Computer.money >= Computer.bet) && (Computer.cards[0] % 13 == Computer.cards[1] % 13 || (Computer.cards[0] % 13 > 7 && Computer.cards[0] % 13 < 12 && Computer.cards[1] % 13 > 7 && Computer.cards[1] % 13 < 12)))
-                    {
-                        sp = true;
-                        split();
-                       // secondturn = false;
-                    }
-                    else
-                    {
-                        int tmp = cp;
-                        bool ace = false;
-                        
-                        for (int i = 0; i < Computer.cards.Count; i++)
-                            if (Computer.cards[i] % 13 == 12)
-                            {
-                                ace = true;
-                                break;
-                            }
+                while ((cp = Computer.get_points(Computer.cards)) < 22)
+                {
+                    if (Computer.evaluate(Computer,Dealer))
+                        break;
 
-                        if (ace && secondturn) 
-                        {
-                            secondturn = false;
-                            int tmp2 = cp - 11;
-                            string x = EvaluationTable[10 + (tmp2 + 8) % 10];
-                            char decision = x[3 + (dp - 2) * 2];
-                            if (decision == 's')
-                                break;
-                            else
-                            {
-                                int r = rnd.Next(0, Index.Count);
-                                Computer.pic[Computer.counter].Image = Cards[Index[r]];
-                                Computer.cards.Add(Index[r]);
-                                Index.Remove(Index[r]);
-                                Computer.counter++;
-                            }
-
-                        }
-                        else
-                        {
-                            secondturn = false;
-                            if (tmp > 16)
-                                break;
-                            if (tmp < 9)
-                                tmp = 8;
-                            else
-                                tmp = tmp % 10;
-
-                        
-
-                            string x = EvaluationTable[(tmp + 2) % 10];
-                            char decision = x[3 + (dp - 2) * 2];
-                            if (decision == 's')
-                                break;
-                            else
-                            {
-                                int r = rnd.Next(0, Index.Count);
-                                Computer.pic[Computer.counter].Image = Cards[Index[r]];
-                                Computer.cards.Add(Index[r]);
-                                Index.Remove(Index[r]);
-                                Computer.counter++;
-                            }
-                        }
-
-
-                    }
-
-                }       
+                    int r = rnd.Next(tmp_cards.Count);
+                    Computer.draw(tmp_cards[r], Computer.counter);
+                    tmp_cards.Remove(tmp_cards[r]);
+                    Computer.counter++;
+                }
             }
 
-            while (dp < 17)
+            label2.Text = "Kapitał Gracza Komputerowego " + Computer.money.ToString() + "$" + "\nStawka " + Computer.bet.ToString() + "$   " + Computer.get_points(Computer.cards).ToString() + "pkt";
+            if (Computer.get_points(Computer.cards) > 21)
+                label2.Text += " FURA";
+
+            //dealer dobiera karty
+            while ((dp = Dealer.get_points(Dealer.cards)) < 17) 
             {
-                int r = rnd.Next(0, Index.Count);
-                Dealer.pic[Dealer.counter].Image = Cards[Index[r]];
-                Dealer.cards.Add(Index[r]);
-                dp = Dealer.getPoints(Dealer.cards);
-                Index.Remove(Index[r]);
+                int r = rnd.Next(tmp_cards.Count);
+                Dealer.draw(tmp_cards[r], Dealer.counter);
+                tmp_cards.Remove(tmp_cards[r]);
                 Dealer.counter++;
             }
+            label3.Text = "Krupier\n" + Dealer.get_points(Dealer.cards).ToString()+"pkt";
 
             //czlowiek
-            if ((hp < 22 && dp > 21) || (hp > dp && hp < 22))
-            {
-                Human.money += 2 * Human.bet;
-                label1.Text = "Wygrana + " + (2 * Human.bet).ToString() + "$";
-            }
-            else if (hp == dp && hp < 22)  {
-                Human.money += Human.bet;
-                label1.Text = "remis, zwrot " + Human.bet.ToString() + "$";
-            }
+
+            X tmp = Dealer.Results(Human, Dealer, true);
+            if (tmp == X.w)
+                label8.Text += "\nWygrana +" + (2 * Human.bet).ToString() + "$";
+            else if (tmp == X.r)
+                label8.Text += "\nRemis, zwrot " + Human.bet.ToString() + "$";
+            else if (tmp == X.p)
+                label8.Text += "\nPrzegrana -" + Human.bet.ToString() + "$";
             else
-            {
-                label1.Text = "Przegrana - " + Human.bet.ToString() + "$";
-            }
+                label8.Text = null;
+
+            tmp = Dealer.Results(Human, Dealer);
+            label1.Text = "Mój kapitał " + Human.money.ToString() + "$" + "\nStawka " + Human.bet.ToString() + "$   " + Human.get_points(Human.cards).ToString() + "pkt";
+
+            if (tmp == X.w)
+                label1.Text += "\nWygrana +" + (2 * Human.bet).ToString() + "$";
+            else if (tmp == X.r)
+                label1.Text += "\nRemis, zwrot " + Human.bet.ToString() + "$";
+            else if (tmp == X.p)
+                label1.Text += "\nPrzegrana -" + Human.bet.ToString() + "$";
+            else
+                label1.Text = null;
 
 
-            if (hs == 0)
-            {
-                label7.Text = null;
-            }
-            else if  ((hs < 22 && dp > 21) || (hs > dp && hs < 22)) 
-            {
-                Human.money += 2 * Human.bet;
-                label7.Text = "Wygrana + " + (2 * Human.bet).ToString() + "$";
-            }
-            else if (hs == dp && hs < 22)
-            {
-                Human.money += Human.bet;
-                label7.Text = "remis, zwrot " + Human.bet.ToString() + "$";
-            }
-            else
-            {
-                label7.Text = "Przegrana - " + Human.bet.ToString() + "$";
-            }
+
+
 
             //komputer
-            if ((cp < 22 && dp > 21) || (cp > dp && cp < 22))
-            {
-                Computer.money += 2 * Computer.bet;
-                label2.Text = "Wygrana + " + (2 * Computer.bet).ToString() + "$";
-            }
-            else if (cp == dp && cp < 22) 
-            {
-                Computer.money += Computer.bet;
-                label2.Text = "remis, zwrot " + Human.bet.ToString() + "$";
-            }
+            tmp = Dealer.Results(Computer, Dealer, true);
+            if (tmp == X.w)
+                label9.Text += "\nWygrana +" + (2 * Computer.bet).ToString() + "$";
+            else if (tmp == X.r)
+                label9.Text += "\nRemis, zwrot " + Computer.bet.ToString() + "$";
+            else if (tmp == X.p)
+                label9.Text += "\nPrzegrana -" + Computer.bet.ToString() + "$";
             else
-            {
-                label2.Text = "Przegrana - " + Computer.bet.ToString() + "$";
-            }
+                label9.Text = null;
 
-            cs = Computer.getPoints(Computer.Splitcards);
-
-            if (cs == 0)
-            {
-                label7.Text = null;
-            }
-            else if ((cs < 22 && dp > 21) || (cs > dp && cp < 22))
-            {
-                Computer.money += 2 * Computer.bet;
-                label8.Text = "Wygrana + " + (2 * Computer.bet).ToString() + "$";
-            }
-            else if (cs == dp && cp < 22)
-            {
-                Computer.money += Computer.bet;
-                label8.Text = "remis, zwrot " + Human.bet.ToString() + "$";
-            }
+            tmp = Dealer.Results(Computer, Dealer);
+            if (tmp == X.w)
+                label2.Text += "\nWygrana +" + (2 * Computer.bet).ToString() + "$";
+            else if (tmp == X.r)
+                label2.Text += "\nRemis, zwrot " + Computer.bet.ToString() + "$";
+            else if (tmp == X.p)
+                label2.Text += "\nPrzegrana -" + Computer.bet.ToString() + "$";
             else
-            {
-                label8.Text = "Przegrana - " + Computer.bet.ToString() + "$";
-            }
+                label2.Text = null;
 
 
-            label5.Text = Human.money.ToString() + "$";
-            label6.Text = Computer.money.ToString() + "$";
-            label3.Text = Dealer.getPoints(Dealer.cards).ToString();
             button1.Enabled = false;
             button2.Enabled = false;
             button3.Enabled = false;
-            button4.Enabled = true;
-            button5.Enabled = true;
-            button6.Enabled = true;
-            button7.Enabled = false;
-            call(false);
+            button4.Enabled = false;
+            button9.Enabled = false;
+            if (Human.money < 1)
+            {
+                button7.Enabled = true;
+                label1.Text = "KONIEC GRY";
+            }
+            else
+            {
+                textBox1.Clear();
+                textBox1.Enabled = true;
+                button8.Enabled = true;
+            }
+
+            do_color();
         }
+
+
+
 
         private void button4_Click(object sender, EventArgs e)
         {
-            Human.money -= 2;
-            Human.bet = 2;
-            button1.Enabled = true;
+            Human.money -= Human.bet;
+            pictureBox22.Image = pictureBox2.Image;
+            pictureBox2.Image = null;
+            Card tmp = Human.cards[0];
+            Card tmp2 = Human.cards[1];
+            Human.cards.Clear();
+            Human.cards.Add(tmp);
+            Human.split_cards.Add(tmp2);
+            Human.counter--;
+            label1.Text = "Mój kapitał " + Human.money.ToString() + "$" + "\nStawka " + Human.bet.ToString() + "$   " + Human.get_points(Human.cards).ToString() + "pkt";
+            label8.Text = "Split   " + Human.get_points(Human.split_cards).ToString() + "pkt";
             button4.Enabled = false;
-            button5.Enabled = false;
-            button6.Enabled = false;
-            ComputerCall();
+            button5.Enabled = true;
+            button6.Enabled = true;
+            button2.Enabled = false;
+            button3.Enabled = false;
+            button9.Enabled = false;
+
+            do_color();
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            button1.Enabled = true;
-            button4.Enabled = false;
-            button5.Enabled = false;
-            button6.Enabled = false;
-            Human.money -= 4;
-            Human.bet = 4;
-            ComputerCall();
+            int r = rnd.Next(tmp_cards.Count);
+            Human.draw(tmp_cards[r], Human.split_counter,true);
+            tmp_cards.Remove(tmp_cards[r]);
+            Human.split_counter++;
+            label8.Text = "Split   " + Human.get_points(Human.split_cards).ToString()+"pkt";
+            if (Human.get_points(Human.split_cards) < 22 && Human.split_counter == 7)
+            {
+                label1.Text += " \nWygrana";
+                button2.Enabled = false;
+            }
+            if (Human.get_points(Human.split_cards) > 21)
+            {
+                label8.Text += " FURA";
+                button5.Enabled = false;
+            }
+
+            do_color();
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            button1.Enabled = true;
-            button4.Enabled = false;
             button5.Enabled = false;
             button6.Enabled = false;
-            Human.money -= 10;
-            Human.bet = 10;
-            ComputerCall();
-            //Computer.money -= 91;
+            button2.Enabled = true;
+            button3.Enabled = true;
+            do_color();
         }
 
 
         private void button7_Click(object sender, EventArgs e)
         {
-            Human.money -= Human.bet;
-            label7.Text = "SPLIT ";
-            pictureBox22.Image = pictureBox2.Image;
-            pictureBox2.Image = null;
-            int tmp = Human.cards[0];
-            int tmp2 = Human.cards[1];
-            Human.cards.Clear();
-            Human.cards.Add(tmp);
-            Human.Splitcards.Add(tmp2);
-            Human.counter--;
-            label1.Text = Human.getPoints(Human.cards).ToString();
-            label7.Text += Human.getPoints(Human.Splitcards) + "$";
-            label5.Text = Human.money.ToString() + "$";
-            button7.Enabled = false;
-            button8.Enabled = true;
-            button9.Enabled = true;
-            button2.Enabled = false;
-            button3.Enabled = false;
+            if(button7.Text=="NOWA GRA")
+            {
+                newgame = true;
+                this.Close();
+            }
+
+            label1.Text = null;
+            label2.Text = null;
+            label3.Text = null;
+            label6.Text = null;
+            label7.Text = "       Dziękuję za grę";
+            label7.Font = new Font("Calibri", 40);
+            label8.Text = null;
+            label9.Text = null;
+            textBox1.Text = null;
+            for (int i = 0; i < 3; i++)
+            {
+                Players[i].cards.Clear();
+                Players[i].split_cards.Clear();
+                Players[i].counter = 2;
+                Players[i].split_counter = 1;
+
+                for (int j = 0; j < 7; j++)
+                {
+                    Players[i].pic[j].Image = null;
+                    if (i == 2)
+                        continue;
+                    Players[i].split_pic[j].Image = null;
+                }
+
+            }
+            button7.Text="NOWA GRA";
+            do_color();
         }
 
         private void button8_Click(object sender, EventArgs e)
         {
-            int r = rnd.Next(0, Index.Count);
-            Human.Splitpic[Human.Splitcounter].Image = Cards[Index[r]];
-            Human.Splitcards.Add(Index[r]);
-            Index.Remove(Index[r]);
-            Human.Splitcounter++;
-            int tmp = Human.getPoints(Human.Splitcards);
-
-            if (tmp < 22 && Human.Splitcards.Count == 7)
-                label7.Text = "Wygrana" + (2 * Human.bet).ToString() + "$";
-            else if (tmp < 22)
-                label7.Text = tmp.ToString();
-            else
+            if (textBox1.Text != "" && Int32.Parse(textBox1.Text) <= Human.money && Int32.Parse(textBox1.Text) > 0)
             {
-                label7.Text = "Przegrana -" + Human.bet.ToString() + "$";
-                button2.Enabled = true;
-                button3.Enabled = true;
+                //czyszczenie pictureboxow
+                for (int i = 0; i < 3; i++)
+                {
+                    Players[i].cards.Clear();
+                    Players[i].split_cards.Clear();
+                    Players[i].counter = 2;
+                    Players[i].split_counter = 1;
+                    Players[i].bet = 0;
+
+                    for (int j = 0; j < 7; j++)
+                    {
+                        Players[i].pic[j].Image = null;
+                        if (i == 2)
+                            continue;
+                        Players[i].split_pic[j].Image = null;
+                    }
+
+                }
+
+                //stawki
+                Human.bet = Int32.Parse(textBox1.Text);
+                Human.money -= Human.bet;
+                label1.Text = "Mój kapitał " + Human.money.ToString() + "$" + "\nStawka " + Human.bet.ToString() + "$";
+                if (Computer.money > 0 || Computer.bet > 0)
+                {
+                    Computer.bet = rnd.Next(1, (Computer.money + 1) / 2);
+                   // Computer.bet = Computer.money;
+                    Computer.money -= Computer.bet;
+                    label2.Text = "Kapitał Gracza Komputerowego " + Computer.money.ToString() + "$" + "\nStawka " + Computer.bet.ToString() + "$";
+                }
+                else
+                {
+                    Computer.bet = 0;
+                    label2.Text = null;
+                }
+                label3.Text = "Krupier\n";
+
+           
+                label8.Text = null;
+                label9.Text = null;
+                textBox1.Enabled = false;
+                button1.Enabled = true;
                 button8.Enabled = false;
-                button9.Enabled = false;
             }
+            else
+                MessageBox.Show("nie mozesz zagrac za tyle $");
+            do_color();
         }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            /*
+            string tmp = (System.IO.Path.GetFullPath(@"..\..\") + "rules.txt").Replace('\\', '/');
+            MessageBox.Show(File.ReadAllText(tmp, Encoding.GetEncoding(1250)));
+            */
+            MessageBox.Show(File.ReadAllText((System.IO.Path.GetFullPath(@"..\..\") + "rules.txt").Replace('\\', '/'), Encoding.GetEncoding(1250)));
+        }
+
 
 
         private void button9_Click(object sender, EventArgs e)
         {
-            button2.Enabled = true;
-            button3.Enabled = true;
-            button8.Enabled = false;
+            Human.money -= Human.bet;
+            Human.bet *= 2;
+            label1.Text = "Mój kapitał " + Human.money.ToString() + "$" + "\nStawka " + Human.bet.ToString() + "$   " + Human.get_points(Human.cards).ToString() + "pkt";
             button9.Enabled = false;
+            button4.Enabled = false;
+            do_color();
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-      
+            //nie pozwalamy na nic innego niz liczby
+            char x = e.KeyChar;
+            if (!Char.IsDigit(x) && !(x=='\r' || x==8))
+            {
+                e.Handled = true;
+                MessageBox.Show("nieprawidlowa warotsc");
+            }
+           
         }
 
-        private void pictureBox15_Click(object sender, EventArgs e)
-        {
-      
-        }
 
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox9_Click(object sender, EventArgs e)
-        {
-
-        }
-
-    
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label5_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

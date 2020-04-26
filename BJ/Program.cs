@@ -15,7 +15,10 @@ namespace BJ
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+
+            do{
+                Application.Run(new Form1());
+            } while (Form1.newgame);
         }
     }
 }

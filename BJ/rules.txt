@@ -1,0 +1,18 @@
+ZASADY GRY
+-Ja i gracz komputerowy gramy osobno i rywalizujemy tylko z krupierem.
+-Wygrywa ten, kto jest blizej 21pkt, ale nie przekroczyl 21pkt.
+-Przy remisie nastepuje zwrot stawki.
+-Jezeli Ja lub gracz komputerowy przekorczymy 21pkt mamy furê.
+-Fura zawsze przegrywa, nawet jesli krupier tez przekroczyl 21pkt.
+-Punkty liczy sie nastepujaco: 
+	-od 2 do 10 zgodnie z liczba na karcie; 
+	-walet, dama i krol po 10;
+	-As 1 lub 11, w zaleznosci, co lepsze w danej sytuacji.
+-SPLIT pobiera kwote stawki, a nastepnie rozdziela karty na dwie gry.
+Mozna uzyc tylko dla kart o tej samej wartosci np(7-7, krol-walet itd.)
+przed wcisnieciem jakiejkolwiek innej opcji.
+-Po wybraniu opcji SPLIT najpierw trzeba zagrac gre splitu.
+-Podwojenie podwaja poczatkowa stawke.
+-Stawke wpisujemy pod polem OBSTAW, nastepnie klikamy ZATWIERDZ.
+-Jak graczowi komputerowemu skoncza sie pieniadze, to odpada z gry.
+-Jak nam sie skoncza pieniadze nastepuje koniec gry.
